@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Her Special Day</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&family=Nunito:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#150f24;--bg2:#2a1236;--rose:#f08aa5;--gold:#f4cf86;--paper:#fbf1e8;--ink:#2b1a2e;
+  --serif:"Cormorant Garamond",Georgia,serif;--sans:"Nunito",system-ui,sans-serif}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{background:radial-gradient(circle at 50% 0,var(--bg2),var(--bg) 70%);color:var(--paper);font-family:var(--sans);
+  overflow:hidden;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+.scene{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:24px;gap:18px;opacity:0;visibility:hidden;transition:opacity .8s,visibility .8s;overflow-y:auto}
+.scene.on{opacity:1;visibility:visible}
+h1,h2{font-family:var(--serif);font-weight:500;line-height:1.1}
+h1{font-size:clamp(2.6rem,10vw,5rem)} h2{font-size:clamp(2rem,7vw,3.2rem)}
+h1 em,h2 em{color:var(--rose)}
+h1.hero{font-size:clamp(1.9rem,7vw,3.2rem);max-width:16ch}
+.tag{color:var(--gold);font-size:.9rem;letter-spacing:.08em}
+p.sub{opacity:.75;max-width:34ch}
+button{font:inherit;cursor:pointer;border:1px solid var(--gold);background:transparent;color:var(--gold);
+  padding:12px 26px;border-radius:99px;transition:background .2s,color .2s}
+button:hover,button:focus-visible{background:var(--gold);color:var(--bg);outline:none}
+button.solid{background:var(--rose);border-color:var(--rose);color:var(--bg);font-weight:600}
+.count{display:flex;gap:14px;align-items:flex-start;font-family:var(--serif)}
+.count div{min-width:64px}.count b{display:block;font-size:2.6rem;font-weight:500}
+.count span{font-family:var(--sans);font-size:.75rem;opacity:.7}
+.songs{display:flex;flex-direction:column;gap:10px;width:min(360px,100%)}
+.songs button{text-align:left;border-color:#ffffff33;color:var(--paper)}
+.songs button.sel{border-color:var(--rose);background:#f08aa522}
+.gift{font-size:4.5rem;background:none;border:0;padding:0;filter:grayscale(1) opacity(.4);transition:filter .4s,transform .3s}
+.gift.ready{filter:none;animation:bob 1.6s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-8px) rotate(-4deg)}}
+.letter{background:var(--paper);color:var(--ink);padding:28px 24px;border-radius:6px;width:min(420px,100%);
+  font-family:var(--serif);font-size:1.25rem;line-height:1.6;text-align:left;max-height:55vh;overflow-y:auto;white-space:pre-line}
+.frame{width:min(340px,86vw);aspect-ratio:3/4;border-radius:8px;background:linear-gradient(135deg,#5b2a63,#c4577a);
+  display:grid;place-items:center;overflow:hidden;box-shadow:0 20px 50px #0008;padding:14px;font-family:var(--serif);font-size:1.4rem}
+.frame img{width:100%;height:100%;object-fit:cover;border-radius:4px}
+.nav{display:flex;gap:16px;align-items:center}
+.nav button{padding:8px 16px}
+video{width:min(420px,100%);border-radius:10px;background:#000;max-height:50vh}
+#tree{width:min(480px,100%);height:min(46vh,380px)}
+#mute{position:fixed;top:calc(12px + env(safe-area-inset-top));right:14px;z-index:9;padding:6px 14px;font-size:.8rem;display:none}
+@media (prefers-reduced-motion:reduce){.gift.ready{animation:none}.scene{transition:none}}
+</style>
+</head>
+<body>
+<button id="mute">Matikan musik</button>
+
+<!-- 1. Hitung mundur -->
+<section class="scene on" id="s-count">
+  <p class="tag" id="tz">Menghitung hari</p>
+  <h1 class="hero">Hello, it’s your future hubby here,<br><em>and I wanna give a gift to u..</em></h1>
+  <p class="sub">look it up</p>
+  <div class="count">
+    <div><b id="d">00</b><span>Hari</span></div><div><b id="h">00</b><span>Jam</span></div>
+    <div><b id="m">00</b><span>Menit</span></div><div><b id="s">00</b><span>Detik</span></div>
+  </div>
+  <button class="solid" data-go="s-juke">Open Her Gift</button>
+</section>
+
+<!-- 2. Jukebox + kado -->
+<section class="scene" id="s-juke">
+  <p class="tag">Jukebox</p>
+  <h2>Pilih Lagu Kita</h2>
+  <div class="songs" id="songs"></div>
+  <p class="sub" id="hint">Pilih satu lagu dulu, lalu ketuk kadonya</p>
+  <button class="gift" id="gift" aria-label="Buka kado">🎁</button>
+</section>
+
+<!-- 3. Surat -->
+<section class="scene" id="s-letter">
+  <p class="tag">A love letter for you</p>
+  <h2>Chelsea Hutami Putri</h2>
+  <p class="sub">Created with love, just for you.</p>
+  <button data-go="s-letter2">Read my letter</button>
+</section>
+<section class="scene" id="s-letter2">
+  <div class="letter" id="letter"></div>
+  <button data-go="s-mem">Our memories</button>
+</section>
+
+<!-- 4. Kenangan -->
+<section class="scene" id="s-mem">
+  <h2>Our Memories</h2>
+  <p class="sub">every moment captured in love</p>
+  <div class="frame" id="frame"></div>
+  <div class="nav"><button id="prev" aria-label="Sebelumnya">‹</button><span id="pos"></span><button id="next" aria-label="Berikutnya">›</button></div>
+  <button data-go="s-film">Next · A moment for you</button>
+</section>
+
+<!-- 5. Video -->
+<section class="scene" id="s-film">
+  <p class="tag">Now showing</p>
+  <h2>Film Untukmu</h2>
+  <video id="vid" controls playsinline></video>
+  <p class="sub" id="novid" hidden>Video belum diisi. Isi VIDEO_SRC di bagian CONFIG.</p>
+  <button data-go="s-msg">Read my heart</button>
+</section>
+
+<!-- 6. Pesan -->
+<section class="scene" id="s-msg">
+  <p class="tag">Pesan dari hatiku</p>
+  <div class="letter" id="msg"></div>
+  <button data-go="s-final">One last surprise</button>
+</section>
+
+<!-- 7. Final + pohon -->
+<section class="scene" id="s-final">
+  <p class="tag">I LOVE YOU MY PRETTY FUTURE WIFE, MY ANGPAO, MY EVERYTHING!!!</p>
+  <h2 id="bd"></h2>
+  <canvas id="tree" width="480" height="380"></canvas>
+  <p class="sub">Semoga cinta dan kebahagiaan kita terus tumbuh dan mekar, sebagaimana pohon ini yang tak pernah berhenti berkembang...</p>
+  <button id="replay">Replay our story ↺</button>
+</section>
+
+<script>
+/* ============ CONFIG: ubah bagian ini saja ============ */
+const CONFIG = {
+  name: "Sayangku",
+  target: "2027-05-08T00:00:00+07:00",          // tanggal & jam ulang tahun (WITA = +08:00)
+  timezoneLabel: "WIB",
+  songs: [                                       // taruh file mp3 di folder yang sama
+    {title: "Lagu Pertama", src: "lagu1.mp3"},            // contoh: "lagu1.mp3"
+    {title: "Lagu Kedua",   src: "lagu2.mp3"},
+    {title: "Lagu Ketiga",  src: "lagu3.mp3"}
+  ],
+  letter: "Sayang,\n\nTerima kasih sudah hadir di hidupku dan menjadi bagian terindah dari hari-hariku. Aku bersyukur bisa mengenalmu, mencintaimu, dan berjalan sejauh ini bersamamu. Semoga ke depannya kita semakin bahagia, semakin kuat menghadapi apa pun bersama, sampai semua impian masa depan yang kita bayangkan tercapai. I hope we get to grow old together, creating endless memories, until the day I can finally call you my wife. Here's to our happily ever after, with you and only you. ❤️\n\nDengan cinta,\nYour Jimbon.",
+  memories: [                                    // src = nama file foto, caption = teks
+    {src: "foto1.jpeg", caption: "Pertama kali kita aku foto kamu diem diem bb hehe"},
+    {src: "foto2.jpeg", caption: "Hari yang tak terlupakan aka aku nembak kamu xixi"},
+    {src: "foto3.jpeg", caption: "One of the best our photo bb"}
+  ],
+  VIDEO_SRC: "video.mp4",                                 // contoh: "film.mp4"
+  message: "Kamu adalah alasan aku tersenyum setiap hari, alasan sederhana kenapa hari-hariku terasa lebih indah, dan seseorang yang selalu ingin aku temui di akhir hari.\n\nSemoga semua doa dan harapanmu satu per satu dijawab oleh semesta. Aku ingin selalu ada di setiap langkahmu, menemanimu saat bahagia maupun sedih, menggenggam tanganmu saat semuanya terasa sulit, dan merayakan setiap hal kecil yang berhasil kamu capai.\n\nAku berharap kita bisa terus tumbuh bersama, belajar memahami satu sama lain, melewati banyak cerita, dan semakin dekat dengan masa depan yang selalu kita impikan. Sampai suatu hari nanti, kita bisa melihat ke belakang dan tersenyum karena ternyata kita berhasil melewati semuanya bersama, hingga akhirnya aku bisa memanggilmu istriku dan mencintaimu seumur hidupku.\n\nI love you, today, tomorrow, and in every tomorrow that we get to share together. ❤️"
+};
+/* ======================================================== */
+const $=id=>document.getElementById(id);
+const go=id=>{document.querySelectorAll(".scene").forEach(s=>s.classList.toggle("on",s.id===id));
+  if(id==="s-final")growTree(); if(id!=="s-film")$("vid").pause()};
+document.addEventListener("click",e=>{const t=e.target.closest("[data-go]");if(t)go(t.dataset.go)});
+$("tz").textContent="Ini timer ke ultah mu bb xixixi · "+CONFIG.timezoneLabel;
+$("bd").textContent="You are stuck with me "+CONFIG.name;
+$("letter").textContent=CONFIG.letter; $("msg").textContent=CONFIG.message;
+
+/* hitung mundur */
+const pad=n=>String(n).padStart(2,"0");
+function tick(){let ms=Math.max(0,new Date(CONFIG.target)-Date.now()),t=Math.floor(ms/1000);
+  $("d").textContent=pad(Math.floor(t/86400));$("h").textContent=pad(Math.floor(t%86400/3600));
+  $("m").textContent=pad(Math.floor(t%3600/60));$("s").textContent=pad(t%60)}
+tick();setInterval(tick,1000);
+
+/* jukebox */
+const audio=new Audio();audio.loop=true;let chosen=-1;
+CONFIG.songs.forEach((s,i)=>{const b=document.createElement("button");b.textContent="♪ "+s.title;
+  b.onclick=()=>{chosen=i;[...$("songs").children].forEach(c=>c.classList.toggle("sel",c===b));
+    if(s.src){audio.src=s.src;audio.play().catch(()=>{});$("mute").style.display="block";$("mute").textContent="Matikan musik"}
+    $("gift").classList.add("ready");$("hint").textContent="Sekarang ketuk kadonya"};
+  $("songs").appendChild(b)});
+$("gift").onclick=()=>{if(chosen>=0)go("s-letter")};
+$("mute").onclick=()=>{if(audio.paused){audio.play();$("mute").textContent="Matikan musik"}
+  else{audio.pause();$("mute").textContent="Nyalakan musik"}};
+
+/* kenangan */
+let mi=0;
+function showMem(){const m=CONFIG.memories[mi];
+  $("frame").innerHTML=m.src?`<img src="${m.src}" alt="${m.caption}">`:`<span>${m.caption}</span>`;
+  $("pos").textContent=(mi+1)+" / "+CONFIG.memories.length}
+$("prev").onclick=()=>{mi=(mi-1+CONFIG.memories.length)%CONFIG.memories.length;showMem()};
+$("next").onclick=()=>{mi=(mi+1)%CONFIG.memories.length;showMem()};
+showMem();
+
+/* video */
+if(CONFIG.VIDEO_SRC)$("vid").src=CONFIG.VIDEO_SRC;else{$("vid").hidden=true;$("novid").hidden=false}
+$("vid").addEventListener("play",()=>audio.pause());
+$("vid").addEventListener("pause",()=>{if(chosen>=0&&CONFIG.songs[chosen].src&&$("mute").textContent==="Matikan musik")audio.play().catch(()=>{})});
+
+/* pohon tumbuh */
+let raf;
+function growTree(){cancelAnimationFrame(raf);const c=$("tree"),x=c.getContext("2d");x.clearRect(0,0,c.width,c.height);
+  const segs=[],blooms=[];
+  (function br(px,py,a,len,w,d){if(d>9||len<4)return;const nx=px+Math.cos(a)*len,ny=py-Math.sin(a)*len;
+    segs.push({px,py,nx,ny,w,d});
+    if(d>=6)for(let i=0;i<3;i++)blooms.push({x:nx+(Math.random()-.5)*26,y:ny+(Math.random()-.5)*26,r:2+Math.random()*3.5,d});
+    br(nx,ny,a+.1+Math.random()*.35,len*.77,w*.72,d+1);br(nx,ny,a-.1-Math.random()*.35,len*.77,w*.72,d+1)
+  })(c.width/2,c.height-8,Math.PI/2,70,9,0);
+  let f=0;const total=260;
+  (function frame(){f++;const p=f/total;x.clearRect(0,0,c.width,c.height);
+    segs.forEach(s=>{const k=Math.min(1,Math.max(0,p*11-s.d));if(!k)return;
+      x.strokeStyle="#8a5a44";x.lineWidth=s.w;x.lineCap="round";x.beginPath();x.moveTo(s.px,s.py);
+      x.lineTo(s.px+(s.nx-s.px)*k,s.py+(s.ny-s.py)*k);x.stroke()});
+    blooms.forEach(b=>{const k=Math.min(1,Math.max(0,p*11-b.d-1));if(!k)return;
+      x.fillStyle=b.r>4?"#f4cf86":"#f08aa5";x.beginPath();x.arc(b.x,b.y,b.r*k,0,7);x.fill()});
+    if(f<total)raf=requestAnimationFrame(frame)})()}
+$("replay").onclick=()=>{go("s-count");mi=0;showMem()};
+</script>
+</body>
+</html>
